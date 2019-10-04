@@ -1,7 +1,7 @@
+import os
+import pandas
 import urllib.request
 import zipfile
-import os
-
 
 TEMP_FOLDER = "data/temperature/"
 
@@ -10,10 +10,8 @@ SMHI_STHLM_TXT = "stockholm_daily_mean_temperature_1756_2018.txt"
 SMHI_STOCKHOLM_URL = "https://www.smhi.se/polopoly_fs/1.2864!/" + SMHI_STHLM_ZIP
 
 
-
-
-def run():
-    if not os.path.exists( TEMP_FOLDER + '/temperature_stockholm.zip'):
+def collect_data():
+    if not os.path.exists( TEMP_FOLDER + SMHI_STHLM_ZIP):
         print("Fetching temperature data from %s..." % SMHI_STOCKHOLM_URL)
         weather_data = urllib.request.urlopen(SMHI_STOCKHOLM_URL)
         weather_download = weather_data.read()
@@ -25,6 +23,12 @@ def run():
     if not os.path.exists(TEMP_FOLDER + SMHI_STHLM_TXT):
         print("Extracting temperature data from " + SMHI_STHLM_ZIP)
         with zipfile.ZipFile(TEMP_FOLDER + SMHI_STHLM_ZIP, 'r') as zf:
-            with zf.open(TEMP_FOLDER + SMHI_STHLM_TXT) as tf:
-                pass
-    # unpack if needed
+            zf.extractall(TEMP_FOLDER)
+        print("Done!")
+
+
+def load():
+    columns = ((0,4), (5, 7), (8,10), (11,18), (19,26), (27,34), (35,37))
+    df = pandas.read_fwf(TEMP_FOLDER + SMHI_STHLM_TXT, columns, header=None, skipinitialspace=True)
+    df.columns =['Year', 'Month', 'Day', 'Original temp', 'Homogenized temp', 'Adjusted temp', 'Source']
+    print(df)
