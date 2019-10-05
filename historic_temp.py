@@ -1,5 +1,6 @@
 import os
 import pandas
+import matplotlib.pyplot as plt
 import urllib.request
 import zipfile
 
@@ -31,4 +32,6 @@ def load():
     columns = ((0,4), (5, 7), (8,10), (11,18), (19,26), (27,34), (35,37))
     df = pandas.read_fwf(TEMP_FOLDER + SMHI_STHLM_TXT, columns, header=None, skipinitialspace=True)
     df.columns =['Year', 'Month', 'Day', 'Original temp', 'Homogenized temp', 'Adjusted temp', 'Source']
-    print(df)
+    df['Date'] = pandas.to_datetime(df[['Year', 'Month', 'Day']])
+    df.plot(x='Date', y='Adjusted temp', kind='line')
+    plt.show()
