@@ -34,21 +34,32 @@ class HistoricTemperatures:
             print("Done!")
 
     def load(self):
-        columns = ((0,4), (5, 7), (8,10), (11,18), (19,26), (27,34), (35,37))
+        columns = ((0, 4), (5, 7), (8,10), (11,18), (19,26), (27,34), (35,37))
         self.original = pandas.read_fwf(TEMP_FOLDER + SMHI_STHLM_TXT, columns, header=None, skipinitialspace=True)
         self.original.columns =['Year', 'Month', 'Day', 'Original temp', 'Homogenized temp', 'Adjusted temp', 'Source']
+        self.original.astype({'Year': int, 'Month': int, 'Day': int})
 
     def plot(self):
         yearly = self.original.groupby('Year').mean()
         yearly.plot(y='Adjusted temp', kind='line')
         pyplot.show()
 
-    def verify(self):
-        random.seed()
-        total_rows = len(self.original.index)
-        for __ in range(5):
-            row = random.randint(0, total_rows)
-            print('******************************************')
-            print(self.original.iloc[row])
-            print('******************************************\n\n')
+    def verify(self, verify_date = None):
+        if verify_date:
+            y = float(verify_date[:4])
+            m = float(verify_date[5:7])
+            d = float(verify_date[8:10])
+            row = self.original.loc[(self.original['Year'] == y) & (self.original['Month'] == m) &
+                                    (self.original['Day'] == d)]
+            self.print_row(row.index)
+        else:
+            random.seed()
+            total_rows = len(self.original.index)
+            for __ in range(5):
+                row = random.randint(0, total_rows)
+                self.print_row(row)
 
+    def print_row(self, row):
+        print('******************************************')
+        print(self.original.iloc[row])
+        print('******************************************\n\n')
